@@ -1,0 +1,71 @@
+# ------------------------------------------------------------------------#
+# Model settings
+# ------------------------------------------------------------------------#
+
+# Random state
+random_state  : 572
+
+# --------------------------------#
+# Inversion settings
+# --------------------------------#
+## nstate_model : The full domain over which the model is run. The BC is 
+## defined at the edge here so that things are the same in the inversion 
+# #domain regardless of whether buffer elements are optimized or not.
+nstate_model: 23 
+
+## nstate: The number of grid cells optimized by the inverison.
+nstate : 20
+
+## nobs_per_cell: The number of observations over each grid cell. These are
+## distributed evenly over the inversion period.
+nobs_per_cell : 50
+
+## True quantities: These are the quantities that are used to generate the 
+## pseudo-observations
+BCt : 1900 # Boundary condition (ppb)
+xt_abs : 30 # Emissions (ppb/day)
+obs_err : 8 # True observation error (ppb)
+
+# Prior error standard deviations
+sa: 0.5 # Relative uncertainty on the emissions
+sa_BC : 15 # Uncertainty in ppb on the boundary condition
+
+# Observational errors (ppb)
+so : 10
+
+# --------------------------------#
+# Transport settings
+# --------------------------------#
+## Courant number
+Cmax : 1
+
+## Grid cell length (km)
+L : 25
+
+## Wind speed (5 m/s = 432 km/day)
+U : 432
+
+## Times (150/300 hrs = 6.25/12.5 day)
+init_t : 6.25
+total_t: 12.5
+
+# ------------------------------------------------------------------------#
+# Plot settings
+# ------------------------------------------------------------------------#
+# Figure sizes
+scale : 1.5
+base_width : 5 
+base_height : 4.3
+
+# Fontsizes
+title_fontsize : 13
+subtitle_fontsize : 11
+label_fontsize : 9
+tick_fontsize : 7
+
+# Position
+title_loc : 1
+title_pad : 10
+cbar_pad : 0.05
+label_pad : 10
+cbar_label_pad : 30
