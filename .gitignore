@@ -1,0 +1,11 @@
+plots
+**/__pycache__/
+
+# OS files
+.DS_Store
+
+# Logs
+**.log
+
+# IDE/editor
+.vscode/
