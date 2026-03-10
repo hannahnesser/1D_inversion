@@ -342,7 +342,8 @@ def plot_summary(inv_obj, inv_obj_2=None, ls='-', figax=None):
         xp = inv_obj_2.xp
         y0 = inv_obj_2.y0[-inv_obj_2.nstate:]
         y = inv_obj_2.y.reshape(inv_obj_2.nobs_per_cell, inv_obj_2.nstate).T
-        so = inv_obj_2.so.reshape(inv_obj.nobs_per_cell, inv_obj.nstate).T**0.5
+        so = inv_obj_2.so.reshape(inv_obj_2.nobs_per_cell, 
+                                  inv_obj_2.nstate).T**0.5
     ax[1].plot(xp, y0, c='black', ls='-', label='Steady state', zorder=10)
     ax[1].plot(xp, y, c='grey', ls='-', label='Observations', lw=0.5, zorder=9)
 

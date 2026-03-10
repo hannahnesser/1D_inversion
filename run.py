@@ -42,8 +42,8 @@ fig, ax = fp.plot_difference(orig, changed_nobs)
 fp.save_fig(fig, plot_dir, 'changed_nobs')
 
 # Try using more or less accurate observations
-obs_err = orig.obs_err * 1.5
-so = orig.obs_err * 1.5
+obs_err = config['obs_err'] * 1.5
+so = orig.so * 1.5
 changed_obs_err = inv.Inversion(obs_err=obs_err, so=so)
 fig, ax = fp.plot_difference(orig, changed_obs_err)
 fp.save_fig(fig, plot_dir, 'changed_obs_err')
@@ -54,7 +54,7 @@ fp.save_fig(fig, plot_dir, 'changed_obs_err')
 # Try using slower or faster winds
 U = orig.U * 0.5
 changed_U = inv.Inversion(U=U)
-fig, ax = fp.plot_difference(orig, var_U)
+fig, ax = fp.plot_difference(orig, changed_U)
 fp.save_fig(fig, plot_dir, 'changed_U')
 
 # Try using sloshing wind speeds
@@ -70,11 +70,11 @@ changed_BC = inv.Inversion(BC=BC)
 fig, ax = fp.plot_difference(orig, changed_BC)
 fp.save_fig(fig, plot_dir, 'changed_BC')
 
-# Try changing the emissions (and the prior, so that it's not more or less 
-# biased than before
-xt_abs = orig.xt_abs[0] * 1.5
-rs = np.random.RandomState(config['random_state'])
-xa_abs = 1.5 * np.abs(rs.normal(loc=25, scale=5, size=(orig.nstate_model,)))
-changed_x = inv.Inversion(xt_abs=xt_abs, xa_abs=xa_abs)
-fig, ax = fp.plot_difference(orig, changed_x)
-fp.save_fig(fig, plot_dir, 'changed_x')
+# # Try changing the emissions (and the prior, so that it's not more or less 
+# # biased than before
+# xt_abs = orig.xt_abs[0] * 1.5
+# rs = np.random.RandomState(config['random_state'])
+# xa_abs = 1.5 * np.abs(rs.normal(loc=25, scale=5, size=(orig.nstate_model,)))
+# changed_x = inv.Inversion(xt_abs=xt_abs, xa_abs=xa_abs)
+# fig, ax = fp.plot_difference(orig, changed_x)
+# fp.save_fig(fig, plot_dir, 'changed_x')

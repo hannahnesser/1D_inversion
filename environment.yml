@@ -6,3 +6,4 @@ dependencies:
   - pandas
   - python
   - scipy
+  - yaml
