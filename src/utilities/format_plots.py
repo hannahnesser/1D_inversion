@@ -369,6 +369,7 @@ def plot_summary(inv_obj, inv_obj_2=None, ls='-', figax=None):
 def plot_difference(orig, delta):
     fig, ax = get_figax(rows=2, cols=2)
     fig, ax[:, 0] = plot_summary(orig, ls='-', figax=[fig, ax[:, 0]])
+    fig, ax[:, 0] = plot_summary(delta, ls='--', figax=[fig, ax[:, 0]])
     fig, ax[:, 1] = plot_summary(orig, delta, ls=':', figax=[fig, ax[:, 1]])
 
     # Set ylim for emissions plot
@@ -387,7 +388,7 @@ def plot_difference(orig, delta):
     add_labels(ax[0, 1], '', 'Difference\n(ppb/day)')
     add_labels(ax[1, 1], 'State vector element', '')
     add_title(ax[0, 0], 'Base inversions')
-    add_title(ax[0, 1], 'Difference (Inversion - Inversion 1)')
+    add_title(ax[0, 1], 'Difference (Inversion 2 - Inversion 1)')
     add_title(ax[1, 0], 'Observations (Inversion 1)')
     add_title(ax[1, 1], 'Observations (Inversion 2)')
     format_plot(fig, ax, orig.nstate)
