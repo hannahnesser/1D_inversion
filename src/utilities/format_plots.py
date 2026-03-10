@@ -250,7 +250,7 @@ def format_cbar(cbar, cbar_title='', horizontal=False, **cbar_kwargs):
 def save_fig(fig, loc, name, **kwargs):
     fig.savefig(join(loc, name + '.png'),
                 bbox_inches='tight', dpi=500,
-                transparent=True, **kwargs)
+                transparent=False, **kwargs)
     print('Saved %s' % name + '.png')
 
 
