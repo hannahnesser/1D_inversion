@@ -1,0 +1,8 @@
+name: 1d_inversion
+dependencies:
+  - ipython
+  - matplotlib
+  - numpy
+  - pandas
+  - python
+  - scipy
