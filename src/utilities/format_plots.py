@@ -288,31 +288,17 @@ def format_plot(fig, ax, nstate, **fig_kwargs):
         return fig, ax
 
 
-def plot_summary(inv_obj, inv_obj_2=None, ls='-', figax=None):
-    if figax is None:
-        fig, ax = get_figax(rows=2)
-    else:
-        fig, ax = figax
-    add_title(ax[0], 'Base inversion')
-    add_title(ax[1], 'Observations')
-    fig.subplots_adjust(hspace=0.5)
-
+def plot_emis(inv_obj, diff=False, ls='-', ax=None):
     # Plot "true " emissions
-    xt_abs = inv_obj.xt_abs
-    if inv_obj_2 is not None:
-        xt_abs = inv_obj_2.xt_abs - inv_obj.xt_abs
-    ax[0].plot(inv_obj.xp, xt_abs, c=color(2), ls=ls, label='Truth')
+    if not diff:
+        ax.plot(inv_obj.xp, inv_obj.xt_abs, c=color(2), ls=ls, label='Truth')
 
-    # Plot the prior
-    xa_abs = inv_obj.xa_abs
-    if inv_obj_2 is not None:
-        xa_abs = inv_obj_2.xa_abs - inv_obj.xa_abs
-    ax[0].plot(
-        inv_obj.xp, xa_abs, 
-        c=color(4), marker='.', markersize=10, ls=ls,
-        label=r'Prior($\pm$ 50%)')
-    if inv_obj_2 is None:
-        ax[0].fill_between(
+        # Plot the prior
+        ax.plot(
+            inv_obj.xp, inv_obj.xa_abs, 
+            c=color(4), marker='.', markersize=10, ls=ls,
+            label=r'Prior($\pm$ 50%)')
+        ax.fill_between(
             inv_obj.xp, 
             inv_obj.xa_abs - inv_obj.xa_abs*inv_obj.sa**0.5,
             inv_obj.xa_abs + inv_obj.xa_abs*inv_obj.sa**0.5,
@@ -321,18 +307,17 @@ def plot_summary(inv_obj, inv_obj_2=None, ls='-', figax=None):
 
     # Plot the posterior
     xhat_abs = inv_obj.xhat * inv_obj.xa_abs
-    if inv_obj_2 is not None:
-        xhat_abs = (inv_obj_2.xhat * inv_obj_2.xa_abs - 
-                    inv_obj.xhat * inv_obj.xa_abs)
-    ax[0].plot(
+    if diff:
+        xhat_abs = xhat_abs - inv_obj.xt_abs
+    ax.plot(
         inv_obj.xp, xhat_abs, 
         ls=ls, marker='*', markersize=10,
         c=color(6), label=f'Posterior'
     )
+    return ax
 
-    handles_0, labels_0 = ax[0].get_legend_handles_labels()
-    ax[0] = add_labels(ax[0], '', 'Emissions\n(ppb/day)')
 
+def plot_obs(inv_obj, inv_obj_2=None, ls='-', ax=None):
     # Observations
     xp = inv_obj.xp
     y0 = inv_obj.y0[-inv_obj.nstate:]
@@ -344,22 +329,42 @@ def plot_summary(inv_obj, inv_obj_2=None, ls='-', figax=None):
         y = inv_obj_2.y.reshape(inv_obj_2.nobs_per_cell, inv_obj_2.nstate).T
         so = inv_obj_2.so.reshape(inv_obj_2.nobs_per_cell, 
                                   inv_obj_2.nstate).T**0.5
-    ax[1].plot(xp, y0, c='black', ls='-', label='Steady state', zorder=10)
-    ax[1].plot(xp, y, c='grey', ls='-', label='Observations', lw=0.5, zorder=9)
+    ax.plot(xp, y0, c='black', ls='-', label='Steady state', zorder=10)
+    ax.plot(xp, y, c='grey', ls='-', label='Observations', lw=0.5, zorder=9)
 
     # Error range
     y_err_min = (y - so).min(axis=1)
     y_err_max = (y + so).max(axis=1)
-    ax[1].fill_between(xp, y_err_min, y_err_max, color='grey', alpha=0.2)
+    ax.fill_between(xp, y_err_min, y_err_max, color='grey', alpha=0.2)
+
+    return ax
+
+
+def plot_summary(inv_obj, inv_obj_2=None, ls='-', figax=None):
+    if figax is None:
+        fig, ax = get_figax(rows=2)
+    else:
+        fig, ax = figax
+    add_title(ax[0], 'Base inversion')
+    add_title(ax[1], 'Observations')
+    fig.subplots_adjust(hspace=0.5)
+
+    ax[0] = plot_emis(inv_obj, inv_obj_2, ls=ls, ax=ax[0])
+    ax[1] = plot_obs(inv_obj, inv_obj_2, ls=ls, ax=ax[1])
+
+    # Add legend
+    handles_0, labels_0 = ax[0].get_legend_handles_labels()
     handles_1, labels_1 = ax[1].get_legend_handles_labels()
     handles_0.extend(handles_1)
     labels_0.extend(labels_1)
 
     # Aesthetics
+    ax[0] = add_labels(ax[0], '', 'Emissions\n(ppb/day)')
+    ax[1] = add_labels(ax[1], 'State vector element', 'XCH4\n(ppb)')
+
     ax[1] = add_legend(ax[1], handles=handles_0, labels=labels_0,
                         bbox_to_anchor=(0.9, 0.5), loc='center left', ncol=1,
                         bbox_transform=fig.transFigure)
-    ax[1] = add_labels(ax[1], 'State vector element', 'XCH4\n(ppb)')
 
     fig, ax = format_plot(fig, ax, inv_obj.nstate)
 
@@ -367,29 +372,24 @@ def plot_summary(inv_obj, inv_obj_2=None, ls='-', figax=None):
 
 
 def plot_difference(orig, delta):
-    fig, ax = get_figax(rows=2, cols=2)
-    fig, ax[:, 0] = plot_summary(orig, ls='-', figax=[fig, ax[:, 0]])
-    fig, ax[:, 0] = plot_summary(delta, ls='--', figax=[fig, ax[:, 0]])
-    fig, ax[:, 1] = plot_summary(orig, delta, ls=':', figax=[fig, ax[:, 1]])
+    fig, ax = get_figax(rows=2)
+    fig.subplots_adjust(hspace=0.5)
+
+    ax[0] = plot_emis(orig, ls='-', ax=ax[0])
+    ax[0] = plot_emis(delta, ls='--', ax=ax[0])
+
+    # Plot the difference
+    ax[1] = plot_emis(orig, diff=True, ls='-', ax=ax[1])
+    ax[1] = plot_emis(delta, diff=True, ls='--', ax=ax[1])
 
     # Set ylim for emissions plot
-    ylim = np.abs(ax[0, 1].get_ylim()).max()
-    ax[0, 1].set_ylim(-ylim, ylim)
-    ax[0, 1].axhline(0, color='grey', lw=0.5, ls=':')
+    ylim = np.abs(ax[1].get_ylim()).max()
+    ax[1].set_ylim(-ylim, ylim)
+    ax[1].axhline(0, color='grey', lw=0.5, ls=':')
 
-    # Set ylim for observations plot
-    ylim1 = ax[1, 0].get_ylim()
-    ylim2 = ax[1, 1].get_ylim()
-    ymin = np.min([ylim1[0], ylim2[0]])
-    ymax = np.max([ylim1[1], ylim2[1]])
-    ax[1, 0].set_ylim(ymin, ymax)
-    ax[1, 1].set_ylim(ymin, ymax)
-
-    add_labels(ax[0, 1], '', 'Difference\n(ppb/day)')
-    add_labels(ax[1, 1], 'State vector element', '')
-    add_title(ax[0, 0], 'Base inversions')
-    add_title(ax[0, 1], 'Difference (Inversion 2 - Inversion 1)')
-    add_title(ax[1, 0], 'Observations (Inversion 1)')
-    add_title(ax[1, 1], 'Observations (Inversion 2)')
+    add_labels(ax[1], '', 'Difference\n(ppb/day)')
+    add_labels(ax[0], '', 'Emissions\n(ppb/day)')
+    add_title(ax[0], 'Inversions')
+    add_title(ax[1], 'Difference (Posterior - Truth)')
     format_plot(fig, ax, orig.nstate)
     return fig, ax
